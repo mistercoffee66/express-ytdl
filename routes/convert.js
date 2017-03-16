@@ -2,7 +2,7 @@
 
 const express = require('express'),
   router = express.Router(),
-  fs = require('fs'),
+  fs = require('fs-extra'),
   path = require('path'),
   ytdl = require('ytdl-core'),
   ffmpeg = require('fluent-ffmpeg'),
@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
 
   convert(req.query.yturl, function(filepath){
 
-    console.log('callback ',filepath);
+    //console.log('callback ',filepath);
     let filename = path.basename(filepath),
       mimetype = mime.lookup(filename);
 
@@ -32,7 +32,7 @@ router.get('/', (req, res) => {
 
 function convert(url, cb) {
 
-  let dest = 'public/files',
+  let dest = 'public/.tmp',
     stream, filepath;
 
   ytdl.getInfo(url, (err, info) => {
@@ -41,6 +41,9 @@ function convert(url, cb) {
     }
     else {
       //console.log(info);
+      if (!fs.existsSync(dest)){
+        fs.mkdirSync(dest);
+      }
       filepath = path.join(process.cwd(), dest, sanitize(info.title) + '.mp3');
       stream = ytdl(url, {});
       ffmpeg(stream)
