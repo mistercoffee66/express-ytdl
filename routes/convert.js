@@ -7,83 +7,56 @@ const express = require('express'),
   ytdl = require('ytdl-core'),
   ffmpeg = require('fluent-ffmpeg'),
   sanitize = require('sanitize-filename'),
-  mime = require('mime');
+  mime = require('mime'),
+  streamBuffers = require('stream-buffers');
+
+  let myReadableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
 
 router.get('/', (req, res) => {
 
-  convert(req.query.yturl, function(filepath){
+  convert(req.query.yturl, function(filename){
 
-    //console.log('callback ',filepath);
-    let filename = path.basename(filepath),
-      mimetype = mime.lookup(filename);
-
+    let mimetype = mime.lookup(filename);
     res.set('Content-disposition', 'attachment; filename=' + filename);
     res.set('Content-type', mimetype);
-    res.download(filepath, filename, (err) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('download complete');
-        fs.unlink(filepath);
-      }
-    });
+    myReadableStreamBuffer.pipe(res);
+    myReadableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
   })
 });
 
 function convert(url, cb) {
 
-  let dest = 'public/.tmp',
-    stream, filepath;
+  let ffStream, filename, ytStream, ff;
 
   ytdl.getInfo(url, (err, info) => {
     if (err) {
       console.log('An error occurred: ' + process.cwd() + ' ' + err.message);
     }
     else {
-      //console.log(info);
-      if (!fs.existsSync(dest)){
-        fs.mkdirSync(dest);
-      }
-      filepath = path.join(process.cwd(), dest, sanitize(info.title) + '.mp3');
-      stream = ytdl(url, {});
-      ffmpeg(stream)
+      filename = path.join(sanitize(info.title) + '.mp3');
+      ytStream = ytdl(url, {});
+      ffStream = ffmpeg(ytStream)
         .on('error', (err) => {
           console.log('An error occurred: ' + process.cwd() + ' ' + err.message);
-        })
-        .on('end', () => {
-          console.log('Processing finished! ', filepath);
-          cb(path.join(filepath));
         })
         .noVideo()
         .audioChannels(2)
         .audioBitrate('128k')
         .audioCodec('libmp3lame')
-        .save(filepath);
-    }
-  });
+        .format('mp3')
+      ;
 
+      ff = ffStream.pipe();
 
-/*  vstream = youtubedl(url,
-    ['--format=mp4']
-  );
-
-  vstream.on('info', function(info) {
-    console.log('info',info);
-    filepath = path.join(process.cwd(), dest, sanitize(info.title) + '.mp3');
-    ffmpeg(vstream)
-      .on('error', (err) => {
-        console.log('An error occurred: ' + process.cwd() + ' ' + err.message);
+      ff.on('data', function(chunk) {
+        myReadableStreamBuffer.put(chunk);
       })
       .on('end', () => {
-        console.log('Processing finished! ', filepath);
-        cb(path.join(filepath));
-      })
-      .noVideo()
-      .audioChannels(2)
-      .audioBitrate('128k')
-      .audioCodec('libmp3lame')
-      .save(filepath);
-  });*/
+        myReadableStreamBuffer.stop();
+        cb(filename);
+      });
+    }
+  });
 }
 
 module.exports = router;

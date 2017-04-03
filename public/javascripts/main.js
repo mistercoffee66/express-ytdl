@@ -7,6 +7,7 @@
   class ConvertForm {
     constructor(selector) {
       this.$form = $(selector);
+      this.$loader = $('#loader');
       this.$button = $(this.$form.find('button')[0]);
       this.$field = $(this.$form.find('input[type="text"]')[0]);
       this.data = {};
@@ -59,8 +60,8 @@
     }
 
     handleSubmit() {
-      //console.log(data);
-      //TODO: show loader
+      this.$loader.fadeIn();
+      this.$form.fadeOut();
       if (this.data.yturl) {
         this.convert();
       }
