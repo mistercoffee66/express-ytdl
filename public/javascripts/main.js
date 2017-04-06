@@ -68,8 +68,13 @@
     }
 
     convert() {
-      //TODO: hide loader
-      window.location = '/convert?yturl=' + this.data.yturl;
+      let self = this;
+      //window.location = '/convert?yturl=' + this.data.yturl;
+      $.get('/convert?yturl=' + this.data.yturl, function(data, status, jqXHR){
+        window.location = '/convert?yturl=' + self.data.yturl;
+        self.$loader.fadeOut();
+        self.$form.fadeIn();
+      })
     }
 
     init() {

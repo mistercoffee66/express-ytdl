@@ -20,6 +20,9 @@ router.get('/', (req, res) => {
     res.set('Content-disposition', 'attachment; filename=' + filename);
     res.set('Content-type', mimetype);
     myReadableStreamBuffer.pipe(res);
+    myReadableStreamBuffer.on('end', () => {
+      console.log('end');
+    });
     myReadableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
   })
 });
@@ -33,7 +36,8 @@ function convert(url, cb) {
       console.log('An error occurred: ' + process.cwd() + ' ' + err.message);
     }
     else {
-      filename = path.join(sanitize(info.title) + '.mp3');
+      filename = path.join(sanitize(info.title) + '.mp3').replace('’','');
+      console.log(filename)
       ytStream = ytdl(url, {});
       ffStream = ffmpeg(ytStream)
         .on('error', (err) => {
