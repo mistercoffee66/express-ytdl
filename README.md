@@ -25,16 +25,22 @@ Run
 express-ytdl $ npm start 
 ```
 
+####Known Issues
+* some YouTube videos trigger an error in [https://github.com/fent/node-ytdl-core](node-ytdl-core)
+* see [https://github.com/fent/node-ytdl-core/issues/24](this issue)
+
 ### Build and run as a Docker Image
 #### Requirements
 * [Docker](https://www.docker.com/)
 
-Based on [Raman148/ffmpeg-node](https://github.com/Raman148/ffmpeg-node) build for ffmpeg/nodejs on Centos 7
+Based on [truthbean/ffmpeg-node-docker](https://github.com/truthbean/ffmpeg-node-docker)
+
+Start Docker on your host system
 
 Build the image
 
 ```bash
-express-ytdl $ docker build -t your-optional-dockerhub-username/your-app-name
+express-ytdl $ docker build -t your-optional-dockerhub-username/your-app-name .
 ```
 
 Run the container. The container's exposed port is 8080. The first argument of the `-p|port` flag is your localhost port that you want to point to the container, in this example `49160`.

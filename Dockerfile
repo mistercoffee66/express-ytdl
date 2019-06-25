@@ -1,4 +1,4 @@
-FROM raman148/ffmpeg-node:latest
+FROM truthbean/ffmpeg-node-docker
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY package.json /usr/src/app/
