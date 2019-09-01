@@ -13,7 +13,6 @@ const express = require('express'),
   let myReadableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
 
 router.get('/', (req, res) => {
-
   convert(req.query.yturl, function(filename){
 
     let mimetype = mime.lookup(filename);
@@ -28,17 +27,16 @@ router.get('/', (req, res) => {
 });
 
 function convert(url, cb) {
-
+  console.log('convert!')
   let ffStream, filename, ytStream, ff;
 
-  ytdl.getInfo(url, (err, info) => {
-    if (err) {
-      console.log('An error occurred: ' + process.cwd() + ' ' + err.message);
-    }
-    else {
-      filename = path.join(sanitize(info.title) + '.mp3').replace('’','');
+  ytdl.getInfo(url)
+    .then((info) => {
+      //console.log(info)
+      const title = info.title || '_TEMP';
+      filename = path.join(sanitize(title) + '.mp3').replace('’','');
       console.log(filename)
-      ytStream = ytdl(url, {});
+      ytStream = ytdl(url);
       ffStream = ffmpeg(ytStream)
         .on('error', (err) => {
           console.log('An error occurred: ' + process.cwd() + ' ' + err.message);
@@ -55,12 +53,14 @@ function convert(url, cb) {
       ff.on('data', function(chunk) {
         myReadableStreamBuffer.put(chunk);
       })
-      .on('end', () => {
-        myReadableStreamBuffer.stop();
-        cb(filename);
-      });
-    }
-  });
+        .on('end', () => {
+          myReadableStreamBuffer.stop();
+          cb(filename);
+        });
+    })
+    .catch((err) => {
+      console.error(err)
+    });
 }
 
 module.exports = router;
