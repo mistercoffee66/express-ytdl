@@ -14,7 +14,7 @@
       this.fileUrl = '';
       this.isValid = false;
       this.hasbeenSubmitted = false;
-      this.reggie = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[A-Za-z0-9_-]+/i;
+      this.reggie = /https?:\/\/(?:www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?[A-Za-z0-9_-]+/i;
       this.init();
     }
 

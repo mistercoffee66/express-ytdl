@@ -2,7 +2,6 @@
 
 const express = require('express'),
   router = express.Router(),
-  fs = require('fs-extra'),
   path = require('path'),
   ytdl = require('ytdl-core'),
   ffmpeg = require('fluent-ffmpeg'),
