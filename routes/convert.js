@@ -32,7 +32,7 @@ function convert(url, cb) {
   ytdl.getInfo(url)
     .then((info) => {
       //console.log(info)
-      const title = info.title || '_TEMP';
+      const title = info.videoDetails.title || '_TEMP';
       filename = path.join(sanitize(title) + '.mp3').replace('’','');
       console.log(filename)
       ytStream = ytdl(url);
